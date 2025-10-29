@@ -1,6 +1,7 @@
 import tkinter as tk
 import tkinter.font as tkFont
 
+
 class SolverGui:
 
     # Initializes gui and frames, sets default settings
@@ -10,8 +11,12 @@ class SolverGui:
         self.root.title("wordle-solver")
 
         # Initial Screen - Game not visible on the screen
-        self.frameInitial = tk.Frame(self.root, bg="black") 
-        self.labelGameNotVisible = tk.Label(self.frameInitial, text="Wordle game not visible on the screen!", font=tkFont.Font(size=20))
+        self.frameInitial = tk.Frame(self.root, bg="black")
+        self.labelGameNotVisible = tk.Label(
+            self.frameInitial,
+            text="Wordle game not visible on the screen!",
+            font=tkFont.Font(size=20),
+        )
         self.labelGameNotVisible.pack(pady=20)
 
         # Main Screen
@@ -19,7 +24,7 @@ class SolverGui:
         self.labelMain = tk.Label(self.frameMain, text="test")
         self.labelMain.pack(pady=20)
 
-        #End Screen
+        # End Screen
         self.frameEnd = tk.Frame(self.root, bg="blue")
         self.labelEnd = tk.Label(self.frameEnd, text="test")
         self.labelEnd.pack(pady=20)
@@ -28,7 +33,7 @@ class SolverGui:
             frame.place(relwidth=1, relheight=1)
         self.showFrame(self.frameInitial)
 
-    # Opens gui 
+    # Opens gui
     def start(self):
         self.root.mainloop()
 

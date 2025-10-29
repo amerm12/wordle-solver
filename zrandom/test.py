@@ -6,11 +6,11 @@ pyautogui.displayMousePosition()
 from PIL import Image
 import pytesseract
 
-img = Image.open('C:/Users/amera/OneDrive/Desktop/wordle-solver/src/test.png')
+img = Image.open("C:/Users/amera/OneDrive/Desktop/wordle-solver/src/test.png")
 
 text = pytesseract.image_to_string(img)
 
-print(text) 
+print(text)
 
 """ -------------------------------- """
 
@@ -20,15 +20,17 @@ import cv2
 from PIL import ImageGrab
 import time
 
-while(True):
+while True:
 
-    pytesseract.pytesseract.tesseract_cmd ='C:/Program Files/Tesseract-OCR/tesseract.exe'
+    pytesseract.pytesseract.tesseract_cmd = (
+        "C:/Program Files/Tesseract-OCR/tesseract.exe"
+    )
 
-    cap = ImageGrab.grab(bbox =(700, 300, 1400, 900))
+    cap = ImageGrab.grab(bbox=(700, 300, 1400, 900))
 
     tesstr = pytesseract.image_to_string(
-            cv2.cvtColor(nm.array(cap), cv2.COLOR_BGR2GRAY), 
-            lang ='eng')
+        cv2.cvtColor(nm.array(cap), cv2.COLOR_BGR2GRAY), lang="eng"
+    )
     print(tesstr)
 
     time.sleep(5)

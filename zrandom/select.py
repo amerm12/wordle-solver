@@ -1,10 +1,11 @@
 import tkinter as tk
 
+
 class ScreenSelector:
     def __init__(self):
         self.root = tk.Tk()
-        self.root.attributes("-fullscreen", True)        # Fullscreen overlay
-        self.root.attributes("-alpha", 0.3)              # Make it semi-transparent
+        self.root.attributes("-fullscreen", True)  # Fullscreen overlay
+        self.root.attributes("-alpha", 0.3)  # Make it semi-transparent
         self.root.configure(bg="black")
         self.root.bind("<Escape>", lambda e: self.root.destroy())  # Exit on Esc
 
@@ -26,7 +27,14 @@ class ScreenSelector:
         self.start_x = self.canvas.canvasx(event.x)
         self.start_y = self.canvas.canvasy(event.y)
         # Create rectangle
-        self.rect = self.canvas.create_rectangle(self.start_x, self.start_y, self.start_x, self.start_y, outline="red", width=3)
+        self.rect = self.canvas.create_rectangle(
+            self.start_x,
+            self.start_y,
+            self.start_x,
+            self.start_y,
+            outline="red",
+            width=3,
+        )
 
     def on_drag(self, event):
         # Update rectangle while dragging
@@ -41,7 +49,8 @@ class ScreenSelector:
         w, h = x2 - x1, y2 - y1
 
         print(f"Selected region: x={x1}, y={y1}, width={w}, height={h}")
-        self.root.destroy()   # Close overlay
+        self.root.destroy()  # Close overlay
+
 
 # Run it
 ScreenSelector()

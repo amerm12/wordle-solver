@@ -1,6 +1,7 @@
 import pyautogui
 import time
-import re 
+import re
+
 
 class WordleSolver:
 
@@ -11,13 +12,13 @@ class WordleSolver:
 
     def analyzeImage(self):
         pass
-    
+
     # C - Correct
     # I - Incorrect
     # M - Misplaced, wrong spot
     def suggestWords(self, currentWord):
         # DoTo: Handle logic where words have double letters
-        currentWord = currentWord
+        """currentWord = currentWord
         for letter, key in currentWord:
             if key == 'I':
                 self.wrongLetters.append(letter.lower())
@@ -28,15 +29,18 @@ class WordleSolver:
             elif key == 'M':
                 #self.misplacedLetters.append(letter.lower())
                 self.misplacedLetters.insert(currentWord.index((letter, key)), letter.lower())
+        """
 
-        with open('C:/Users/amera/OneDrive/Desktop/wordle-solver/solutions.txt') as f:
+        with open(
+            "C:/Users/amera/OneDrive/Desktop/Skafiskafnjak/Amer/wordle-solver/solutions.txt"
+        ) as f:
             words = f.read().splitlines()
 
-        testAlphabet = ['j', 'z', 'n']
-        alphabetString = ''.join(testAlphabet)
-        regex = ''
+        testAlphabet = ["j", "z", "n"]
+        alphabetString = "".join(testAlphabet)
+        regex = ""
         for letter in self.correctLetters:
-            if(letter == None):
+            if letter == None:
                 # Set any possible letter (alphabetString) to the position
                 regex = regex + r"\dw"
             else:
@@ -46,8 +50,7 @@ class WordleSolver:
 
         pattern = re.compile(regex)
 
-        
-        #pattern = re.compile(fr'\w\w[^{alphabetString}]\w\w')
+        # pattern = re.compile(fr'\w\w[^{alphabetString}]\w\w')
 
         matches = list(filter(pattern.findall, words))
 
