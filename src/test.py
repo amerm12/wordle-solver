@@ -4,6 +4,17 @@ solver = WordleSolver()
 
 # word = [("P", "I"), ("L", "M"), ("A", "C"), ("N", "I"), ("T", "I")]
 
-word = [("V", "C"), ("A", "C"), ("L", "C"), ("I", "I"), ("D", "I")]
+words = [
+    ("R", "M"),  # RAVES ABORT
+    ("A", "M"),
+    ("V", "I"),
+    ("E", "I"),
+    ("S", "I"),
+    ("A", "C"),
+    ("B", "C"),
+    ("O", "M"),
+    ("R", "M"),
+    ("T", "I"),
+]
 
-solver.suggestWords(word)
+solver.suggestWords(words)
