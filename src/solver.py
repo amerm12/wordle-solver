@@ -1,6 +1,8 @@
-import pyautogui
-import time
 import re
+from PIL import Image
+import pytesseract
+import cv2
+import numpy as np
 
 
 class WordleSolver:
@@ -10,8 +12,8 @@ class WordleSolver:
         self.correctLetters = [(), (), (), (), ()]
         self.misplacedLetters = [[], [], [], [], []]
 
-    def analyzeImage(self):
-        print("test")
+    def analyzeImage(self, imagePath):
+
         pass
 
     # C - Correct
@@ -92,3 +94,30 @@ class WordleSolver:
 #   all except ones on that position.
 # - On that position there shouldn't be any letters from wrong letters.
 # - On that position there shouldn't be any letters that are misplaced on that position.
+
+
+""" def analyzeImage(self):
+    imagePath = "C:/Users/amera/OneDrive/Desktop/Skafiskafnjak/Amer/wordle-solver/assets/wordleScreenshot.png"
+    readConfig = r"--psm 6 --oem 3"
+
+    image = cv2.imread(imagePath)
+
+    height, width, _ = image.shape
+
+    boxes = pytesseract.image_to_boxes(image, config=readConfig)
+
+    for box in boxes.splitlines():
+        box = box.split(" ")
+        image = cv2.rectangle(
+            image,
+            (int(box[1]), height - int(box[2])),
+            (int(box[3]), height - int(box[4])),
+            (0, 255, 0),
+            2,
+        )
+
+    cv2.imshow("image", image)
+    cv2.waitKey(0)
+
+
+    pass """
