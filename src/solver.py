@@ -12,9 +12,9 @@ class WordleSolver:
         self.correctLetters = [(), (), (), (), ()]
         self.misplacedLetters = [[], [], [], [], []]
 
-    def analyzeImage(self, imagePath):
-
-        pass
+    def analyzeImage(imagePath):
+        if imagePath:
+            return "WORLD"
 
     # C - Correct
     # I - Incorrect
