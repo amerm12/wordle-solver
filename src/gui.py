@@ -1,4 +1,5 @@
 import customtkinter
+from analyzer import ImageAnalyzer
 from solver import WordleSolver
 
 
@@ -12,16 +13,19 @@ class SolverGui:
         self.app.resizable(False, False)
         self.app.grid_columnconfigure(0, weight=1)
 
+        # Define upload button
         self.button = customtkinter.CTkButton(
             self.app, text="Upload", command=self.uploadImage
         )
         self.button.grid(row=0, column=0, padx=20, pady=20)
 
+        # Define empty label
         self.label = customtkinter.CTkLabel(self.app, text="")
         self.label.grid(row=1, column=0, padx=20, pady=20)
 
         self.app.mainloop()
 
+    # Press method when upload button is pressed
     def uploadImage(self):
         filepath = customtkinter.filedialog.askopenfilename(
             title="Select Image",
@@ -32,9 +36,15 @@ class SolverGui:
             ),
         )
 
-        suggestedWords = WordleSolver.analyzeImage(filepath)
+        analyzer = ImageAnalyzer()
+        solver = WordleSolver()
+        letters = analyzer.analyzeImage(filepath)
+
+        suggestedWords = solver.suggestWords(letters)
+
         self.displayWords(suggestedWords)
 
+    # Display suggested words in the empty label and update button text
     def displayWords(self, words):
         self.button.configure(text="Upload New")
 
