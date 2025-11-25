@@ -1,7 +1,5 @@
 import re
 from PIL import Image
-import pytesseract
-import cv2
 import numpy as np
 
 
@@ -11,9 +9,6 @@ class WordleSolver:
         self.wrongLetters = []
         self.correctLetters = [(), (), (), (), ()]
         self.misplacedLetters = [[], [], [], [], []]
-
-    def analyzeImage(imagePath):
-        pass
 
     # C - Correct
     # I - Incorrect
@@ -25,8 +20,7 @@ class WordleSolver:
 
         words = _words
         for index, (letter, key) in enumerate(words):
-            # Keep index from 0 to 4
-            index = index % 5
+            index = index % 5  # Keep index from 0 to 4
             match key:
                 case "I":
                     self.wrongLetters.append(letter.lower())
@@ -85,7 +79,8 @@ class WordleSolver:
 
         matches = list(filter(pattern.findall, fileWords))
 
-        print(matches)
+        # print(matches)
+        return matches
 
 
 ## If if there is no correct letter for that position, rules:
