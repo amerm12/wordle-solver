@@ -1,6 +1,7 @@
 import cv2
 import pytesseract
 import numpy as np
+from templateMap import TEMPLATES
 
 
 class ImageAnalyzer:
@@ -13,6 +14,9 @@ class ImageAnalyzer:
 
         for square in squares:
             letter = self.extractLetter(square, img)
+            if letter == None:
+                break
+
             correctness = self.getColor(square, img)
             if letter and correctness:
                 letters.append((letter, correctness))
@@ -41,39 +45,35 @@ class ImageAnalyzer:
 
         return squares
 
+    # Detects letter in the square
     def extractLetter(self, _square, _img):
         (x, y, w, h) = _square
 
-        croppedImage = _img[y : y + h, x : x + w]
+        croppedImg = _img[y : y + h, x : x + w]
+        grayImg = cv2.cvtColor(croppedImg, cv2.COLOR_BGR2GRAY)
+        # threshImg = cv2.threshold(grayImg, 200, 255, cv2.THRESH_BINARY_INV)[1]
 
-        grayImage = cv2.cvtColor(croppedImage, cv2.COLOR_BGR2GRAY)
+        bestValue = None
+        bestLetter = None
 
-        resizedImage = cv2.resize(grayImage, (200, 200), cv2.INTER_CUBIC)
+        for letter, tmplPath in TEMPLATES.items():
 
-        thresholdImage = cv2.threshold(resizedImage, 230, 255, cv2.THRESH_BINARY_INV)[1]
+            grayTmpl = cv2.imread(tmplPath, cv2.IMREAD_GRAYSCALE)
+            # threshTmpl = cv2.threshold(grayTmpl, 150, 255, cv2.THRESH_BINARY_INV)[1]
 
-        letter = pytesseract.image_to_string(
-            thresholdImage,
-            lang="eng",
-            config="--psm 10 --oem 3 -c tessedit_char_whitelist=ABCDEFGHIJKLMNOPQRSTUVWXYZ",
-        ).strip()
-        if letter:
-            return letter
+            result = cv2.matchTemplate(grayImg, grayTmpl, cv2.TM_CCOEFF_NORMED)
+            maxVal = cv2.minMaxLoc(result)[1]
+
+            if bestValue == None or maxVal > bestValue:
+                bestValue = maxVal
+                bestLetter = letter
+
+        if bestValue >= 0.7:
+            return bestLetter
         else:
-            thresholdImage = cv2.threshold(
-                croppedImage, 230, 255, cv2.THRESH_BINARY_INV
-            )[1]
-            letter = pytesseract.image_to_string(
-                thresholdImage,
-                lang="eng",
-                config="--psm 10 --oem 3 -c tessedit_char_whitelist=ABCDEFGHIJKLMNOPQRSTUVWXYZ",
-            ).strip()
-            if letter:
-                return letter
-            else:
-                pass
-                # ToDo: Implement error message that says program could not read text from image
+            return None
 
+    # Detects color in the square
     def getColor(self, _square, _img):
         (x, y, w, h) = _square
 
