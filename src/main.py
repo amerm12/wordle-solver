@@ -1,10 +1,8 @@
-import time
 from gui import SolverGui
-from solver import WordleSolver
 
 
 def main():
-    solverGui = SolverGui()
+    gui = SolverGui()
 
 
 if __name__ == "__main__":
