@@ -14,7 +14,8 @@ class WordleSolver:
     # I - Incorrect
     # M - Misplaced, wrong spot
     def suggestWords(self, _words):
-        if len(_words) <= 0:
+        if 0 <= len(_words) > 24:
+            # ToDo: Write error
             print("There are no words")
             return
 
@@ -63,15 +64,19 @@ class WordleSolver:
                             misplacedLettersString = misplacedLettersString + character
                         elif (
                             character in self.misplacedLetters[x]
-                            and character not in wrongLettersString
+                            # and character not in wrongLettersString
+                            and character not in onPositionWrongString
                         ):
                             # onPositionWrongString = onPositionWrongString + character
                             onPositionWrongString = onPositionWrongString + character
 
                 regex = (
                     regex
-                    + f"([{re.escape(misplacedLettersString)}]|[^{re.escape(wrongLettersString + onPositionWrongString)}])"
+                    # + f"((?=[{re.escape(misplacedLettersString)}])[^{re.escape(wrongLettersString + onPositionWrongString)}])"
+                    + f"([^{re.escape(wrongLettersString + onPositionWrongString)}])"
                 )
+
+        # regex = r"([bcdfhijklmnoqstuvwxyz][^grape])([bcdfhijklmnoqstuvwxyz][^grape])([bcdfhijklmnoqstuvwxyz][^grape])([bcdfhijklmnoqstuvwxyz][^grape])([bcdfhijklmnoqstuvwxyz][^grape])"
 
         # print(regex)
 
@@ -79,8 +84,22 @@ class WordleSolver:
 
         matches = list(filter(pattern.findall, fileWords))
 
-        # print(matches)
-        return matches
+        misplacedLettersString = ""
+
+        for letters in self.misplacedLetters:
+            if letters != []:
+                for letter in letters:
+                    # if letter not in misplacedLettersString:
+                    misplacedLettersString = misplacedLettersString + letter
+
+        filteredWords = [
+            w for w in matches if all(c in w for c in misplacedLettersString)
+        ]
+
+        """ print(matches)
+        print(misplacedLettersString)
+        print(filteredWords) """
+        return filteredWords
 
 
 ## If if there is no correct letter for that position, rules:
