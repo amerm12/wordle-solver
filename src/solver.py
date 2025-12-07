@@ -1,33 +1,47 @@
 import re
-from PIL import Image
-import numpy as np
+import random
+
+
+class SolverError(Exception):
+    pass
 
 
 class WordleSolver:
 
     def __init__(self):
+        """self.wrongLetters = []
+        self.correctLetters = [(), (), (), (), ()]  # () is tuple. Can only be changed.
+        self.misplacedLetters = [[], [], [], [], []]  # [] is list. Can be modified."""
+
+    def suggestWords(self, _words):
         self.wrongLetters = []
         self.correctLetters = [(), (), (), (), ()]
         self.misplacedLetters = [[], [], [], [], []]
 
-    # C - Correct
-    # I - Incorrect
-    # M - Misplaced, wrong spot
-    def suggestWords(self, _words):
         if 0 <= len(_words) > 24:
-            # ToDo: Write error
-            print("There are no words")
-            return
+            raise SolverError("Error suggesting words.")
 
         words = _words
         for index, (letter, key) in enumerate(words):
             index = index % 5  # Keep index from 0 to 4
             match key:
-                case "I":
-                    self.wrongLetters.append(letter.lower())
-                case "C":
+                case "I":  # I - Incorrect
+                    # ToDo: If written word has 2 same letters, and correct has only one of those
+                    # one will appear yellow, and the other one will appear gray. But both are
+                    # misplaced, and should be treaded as such. I assume wordle will handle this
+                    # case giving yellow color to first letter that appears, and the next ones will
+                    # be grayed out. Check if this is the case.
+                    if any(
+                        letter.lower() in subMisplaced
+                        for subMisplaced in self.misplacedLetters
+                    ):
+                        self.misplacedLetters[index].append(letter.lower())
+                    else:
+                        self.wrongLetters.append(letter.lower())
+
+                case "C":  # C - Correct
                     self.correctLetters[index] = letter.lower()
-                case "M":
+                case "M":  # M - Misplaced, wrong spot
                     if letter.lower() not in self.misplacedLetters[index]:
                         self.misplacedLetters[index].append(letter.lower())
 
@@ -35,6 +49,27 @@ class WordleSolver:
             "C:/Users/amera/OneDrive/Desktop/Skafiskafnjak/Amer/wordle-solver/solutions.txt"
         ) as f:
             fileWords = f.read().splitlines()
+
+        regex = self.constructRegex()
+
+        pattern = re.compile(regex)
+
+        matches = list(filter(pattern.findall, fileWords))
+
+        misplacedLettersString = ""
+
+        for letters in self.misplacedLetters:
+            if letters != []:
+                for letter in letters:
+                    misplacedLettersString = misplacedLettersString + letter
+
+        filteredWords = [
+            w for w in matches if all(c in w for c in misplacedLettersString)
+        ]
+
+        return filteredWords
+
+    def constructRegex(self):
 
         # Remove all correct letters from misplaced letters group
         wrongLettersString = "".join(self.wrongLetters)
@@ -44,10 +79,9 @@ class WordleSolver:
                     misplacedPosition.remove(correctLetter) """
 
         # Construct regex dynamically
-        # ToDo: Make a new function and move the code
         regex = ""
         for x in range(5):
-            # Letter in a position is correct, just set it
+            # Letter on x position is correct, just set it
             if self.correctLetters[x] != ():
                 regex = regex + self.correctLetters[x]
             # There is no correct letter in a position, create regex
@@ -67,43 +101,48 @@ class WordleSolver:
                             # and character not in wrongLettersString
                             and character not in onPositionWrongString
                         ):
-                            # onPositionWrongString = onPositionWrongString + character
                             onPositionWrongString = onPositionWrongString + character
 
                 regex = (
                     regex
-                    # + f"((?=[{re.escape(misplacedLettersString)}])[^{re.escape(wrongLettersString + onPositionWrongString)}])"
                     + f"([^{re.escape(wrongLettersString + onPositionWrongString)}])"
                 )
 
-        # regex = r"([bcdfhijklmnoqstuvwxyz][^grape])([bcdfhijklmnoqstuvwxyz][^grape])([bcdfhijklmnoqstuvwxyz][^grape])([bcdfhijklmnoqstuvwxyz][^grape])([bcdfhijklmnoqstuvwxyz][^grape])"
+        return regex
 
-        # print(regex)
+    # Fetches 3 random words
+    def fetchStartingWords(self):
+        bestStartingWords = (
+            "about",
+            "crane",
+            "adieu",
+            "trace",
+            "arose",
+            "audio",
+            "media",
+            "roast",
+            "slate",
+            "stare",
+            "least",
+            "roate",
+            "salet",
+            "sauce",
+            "aisle",
+            "alone",
+            "canoe",
+            "cream",
+            "react",
+            "slant",
+            "tales",
+            "cones",
+            "later",
+            "ouija",
+        )
 
-        pattern = re.compile(regex)
+        # Randomly select 3 words from the list of best starting words
+        threeStaringWords = random.sample(bestStartingWords, 3)
 
-        matches = list(filter(pattern.findall, fileWords))
+        if not threeStaringWords or len(threeStaringWords) != 3:
+            raise SolverError("Error suggesting starting words.")
 
-        misplacedLettersString = ""
-
-        for letters in self.misplacedLetters:
-            if letters != []:
-                for letter in letters:
-                    # if letter not in misplacedLettersString:
-                    misplacedLettersString = misplacedLettersString + letter
-
-        filteredWords = [
-            w for w in matches if all(c in w for c in misplacedLettersString)
-        ]
-
-        """ print(matches)
-        print(misplacedLettersString)
-        print(filteredWords) """
-        return filteredWords
-
-
-## If if there is no correct letter for that position, rules:
-# - On that position it should be a letter from misplaced letter, from which are selected
-#   all except ones on that position.
-# - On that position there shouldn't be any letters from wrong letters.
-# - On that position there shouldn't be any letters that are misplaced on that position.
+        return threeStaringWords
