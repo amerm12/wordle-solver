@@ -1,14 +1,23 @@
 import cv2
-import pytesseract
 import numpy as np
 from templateMap import TEMPLATES
+import os
+
+
+class AnalyzerError(Exception):
+    pass
 
 
 class ImageAnalyzer:
 
     def analyzeImage(self, imagePath):
+        if not os.path.exists(imagePath):
+            raise AnalyzerError("File not found.")
+
         img = cv2.imread(imagePath)
         squares = self.findSquares(img)
+        if not squares:
+            raise AnalyzerError("Error analying image. Try uploading different image.")
 
         letters = []
 
@@ -21,8 +30,14 @@ class ImageAnalyzer:
             if letter and correctness:
                 letters.append((letter, correctness))
 
+        if letters == []:
+            raise AnalyzerError(
+                "Error reading the letters from the images. Try uploading different image."
+            )
+
         return letters
 
+    # Find all squares in the image
     def findSquares(self, _img):
         grayImage = cv2.cvtColor(_img, cv2.COLOR_BGR2GRAY)
 
@@ -99,4 +114,3 @@ class ImageAnalyzer:
             return "C"
         else:
             pass
-            # ToDo: Implement error message that says program could not read text from image
