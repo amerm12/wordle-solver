@@ -1,10 +1,13 @@
 import customtkinter
-from analyzer import ImageAnalyzer
-from solver import WordleSolver
 from CTkToolTip import *
 from CTkMessagebox import CTkMessagebox
-from analyzer import AnalyzerError
-from solver import SolverError
+from solver import WordleSolver, SolverError
+from analyzer import ImageAnalyzer, AnalyzerError
+from screenSelector import ScreenSelector
+import cv2
+import numpy as np
+
+from PIL import Image, ImageOps
 
 
 class SolverGui:
@@ -34,14 +37,14 @@ class SolverGui:
             text="wordle-solver",
             text_color="#538d4e",
         )
-        self.logoLabel.grid(row=0, column=0, pady=30, columnspan=2)
+        self.logoLabel.grid(row=0, column=0, pady=30, columnspan=3)
 
         # Define start new game button
         self.startButton = customtkinter.CTkButton(
             self.app,
             text="New Game",
             font=("Helvetica", 24, "bold"),
-            width=200,
+            width=180,
             height=60,
             fg_color="#74a67a",
             hover_color="#5f8c5c",
@@ -66,12 +69,48 @@ class SolverGui:
             y_offset=-25,
         )
 
+        img = Image.open(
+            "C:/Users/amera/OneDrive/Desktop/Skafiskafnjak/Amer/wordle-solver/assets/icons/screenshot.png"
+        )
+        icon = customtkinter.CTkImage(
+            light_image=img,
+            size=(50, 50),
+        )
+
+        # Define screenshot button
+        self.screenshotButton = customtkinter.CTkButton(
+            self.app,
+            text="",
+            image=icon,
+            width=60,
+            height=60,
+            fg_color="#74a67a",
+            hover_color="#213020",
+            command=self.takeScreenshot,
+        )
+        self.screenshotButton.grid(
+            row=1,
+            column=1,
+            columnspan=1,
+            padx=10,
+            pady=10,
+        )
+
+        # Define tooltip for screenshot button using CTkToolTip library
+        CTkToolTip(
+            self.screenshotButton,
+            delay=0.2,
+            message="Take a screenshot",
+            x_offset=15,
+            y_offset=-25,
+        )
+
         # Define upload button
         self.uploadButton = customtkinter.CTkButton(
             self.app,
             text="Upload",
             font=("Helvetica", 24, "bold"),
-            width=200,
+            width=180,
             height=60,
             fg_color="#74a67a",
             hover_color="#5f8c5c",
@@ -80,7 +119,7 @@ class SolverGui:
         )
         self.uploadButton.grid(
             row=1,
-            column=1,
+            column=2,
             padx=(0, 30),
             pady=10,
             columnspan=1,
@@ -123,6 +162,28 @@ class SolverGui:
 
         self.displayWords(startingWords)
 
+    # Press method when screenshot button is pressed
+    def takeScreenshot(self):
+        # ToDo: Implement error handling in screen selector class
+        ScreenSelector(self.app, self.ssBack)
+
+    def ssBack(self, screenshot):
+        cvScreenshot = cv2.cvtColor(np.array(screenshot), cv2.COLOR_RGB2BGR)
+
+        try:
+            letters = self.analyzer.analyzeImage(cvScreenshot)
+        except AnalyzerError as e:
+            self.showError(str(e))
+            return
+
+        try:
+            suggestedWords = self.solver.suggestWords(letters)
+        except SolverError as e:
+            self.showError(str(e))
+            return
+
+        self.displayWords(suggestedWords)
+
     # Press method when upload button is pressed
     def uploadImage(self):
         filepath = customtkinter.filedialog.askopenfilename(
@@ -159,7 +220,7 @@ class SolverGui:
             if i < len(words):
                 label.configure(text=words[i].upper())
                 frame.grid(
-                    row=3 + i, column=0, pady=(30 if i == 0 else 10, 0), columnspan=2
+                    row=3 + i, column=0, pady=(30 if i == 0 else 10, 0), columnspan=3
                 )
             else:
                 frame.grid_forget()
