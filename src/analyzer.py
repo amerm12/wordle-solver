@@ -11,10 +11,14 @@ class AnalyzerError(Exception):
 class ImageAnalyzer:
 
     def analyzeImage(self, imagePath):
-        if not os.path.exists(imagePath):
-            raise AnalyzerError("File not found.")
+        if isinstance(imagePath, np.ndarray):
+            img = imagePath
+        else:
+            if not os.path.exists(imagePath):
+                raise AnalyzerError("File not found.")
 
-        img = cv2.imread(imagePath)
+            img = cv2.imread(imagePath)
+
         squares = self.findSquares(img)
         if not squares:
             raise AnalyzerError("Error analying image. Try uploading different image.")
