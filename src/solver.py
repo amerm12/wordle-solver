@@ -67,6 +67,8 @@ class WordleSolver:
             w for w in matches if all(c in w for c in misplacedLettersString)
         ]
 
+        # ToDo: From filtered ones, first select those ones that are the best.
+
         return filteredWords
 
     def constructRegex(self):
