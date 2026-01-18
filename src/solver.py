@@ -8,17 +8,12 @@ class SolverError(Exception):
 
 class WordleSolver:
 
-    def __init__(self):
-        """self.wrongLetters = []
-        self.correctLetters = [(), (), (), (), ()]  # () is tuple. Can only be changed.
-        self.misplacedLetters = [[], [], [], [], []]  # [] is list. Can be modified."""
-
     def suggestWords(self, _words):
         self.wrongLetters = []
-        self.correctLetters = [(), (), (), (), ()]
-        self.misplacedLetters = [[], [], [], [], []]
+        self.correctLetters = [(), (), (), (), ()]  # () is tuple. Can only be changed.
+        self.misplacedLetters = [[], [], [], [], []]  # [] is list. Can be modified.
 
-        if 0 <= len(_words) > 24:
+        if 0 <= len(_words) > 25:
             raise SolverError("Error suggesting words.")
 
         words = _words
@@ -26,11 +21,8 @@ class WordleSolver:
             index = index % 5  # Keep index from 0 to 4
             match key:
                 case "I":  # I - Incorrect
-                    # ToDo: If written word has 2 same letters, and correct has only one of those
-                    # one will appear yellow, and the other one will appear gray. But both are
-                    # misplaced, and should be treaded as such. I assume wordle will handle this
-                    # case giving yellow color to first letter that appears, and the next ones will
-                    # be grayed out. Check if this is the case.
+                    # If the guess has duplicate letters but the correct word has only one,
+                    # the first occurrence is marked yellow, the rest gray (Wordle behavior).
                     if any(
                         letter.lower() in subMisplaced
                         for subMisplaced in self.misplacedLetters
@@ -41,6 +33,7 @@ class WordleSolver:
 
                 case "C":  # C - Correct
                     self.correctLetters[index] = letter.lower()
+
                 case "M":  # M - Misplaced, wrong spot
                     if letter.lower() not in self.misplacedLetters[index]:
                         self.misplacedLetters[index].append(letter.lower())
@@ -67,18 +60,19 @@ class WordleSolver:
             w for w in matches if all(c in w for c in misplacedLettersString)
         ]
 
-        # ToDo: From filtered ones, first select those ones that are the best.
+        # bestWords = self.getBestWords(filteredWords)
 
         return filteredWords
 
     def constructRegex(self):
 
-        # Remove all correct letters from misplaced letters group
         wrongLettersString = "".join(self.wrongLetters)
-        """ for correctLetter in self.correctLetters:
-            for misplacedPosition in self.misplacedLetters:
-                if correctLetter in misplacedPosition:
-                    misplacedPosition.remove(correctLetter) """
+
+        # Remove misplaced letters if they became correct during the game
+        for i, misplacedPosition in enumerate(self.misplacedLetters):
+            for misplacedLetter in misplacedPosition:
+                if misplacedLetter in self.correctLetters:
+                    self.misplacedLetters[i].remove(misplacedLetter)
 
         # Construct regex dynamically
         regex = ""
@@ -111,6 +105,63 @@ class WordleSolver:
                 )
 
         return regex
+
+    # From all possible words gets best words
+    def getBestWords(self, filteredWords):
+        # Put all known letters (correct and misplaced) into one list
+        knownLetters = []
+        for correctLetter in self.correctLetters:
+            if correctLetter != ():
+                knownLetters.append(correctLetter)
+
+        for misplacedPosition in self.misplacedLetters:
+            if misplacedPosition != []:
+                for misplacedLetter in misplacedPosition:
+                    knownLetters.append(misplacedLetter)
+
+        for i, word in enumerate(filteredWords):
+            # Remove all known letters from filtered word
+            for knownLetter in knownLetters:
+                if knownLetter in word:
+                    word = word.replace(knownLetter, "")
+
+            # Check if word contains most common letters and add points
+            if "s" in word:
+                filteredWords[i].append(+1)
+            if "e" in word:
+                filteredWords[i].append(+1)
+            if "a" in word:
+                filteredWords[i].append(+1)
+            if "o" in word:
+                filteredWords[i].append(+1)
+            if "r" in word:
+                filteredWords[i].append(+1)
+            if "i" in word:
+                filteredWords[i].append(+1)
+            if "l" in word:
+                filteredWords[i].append(+1)
+            if "t" in word:
+                filteredWords[i].append(+1)
+            if "n" in word:
+                filteredWords[i].append(+1)
+            if "u" in word:
+                filteredWords[i].append(+1)
+            if "d" in word:
+                filteredWords[i].append(+1)
+            if "y" in word:
+                filteredWords[i].append(+1)
+            if "c" in word:
+                filteredWords[i].append(+1)
+            if "p" in word:
+                filteredWords[i].append(+1)
+            if "m" in word:
+                filteredWords[i].append(+1)
+            if "h" in word:
+                filteredWords[i].append(1)
+            if "g" in word:
+                filteredWords[i].append(+1)
+
+        print(filteredWords)
 
     # Fetches 3 random words
     def fetchStartingWords(self):
