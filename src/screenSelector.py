@@ -2,6 +2,10 @@ import customtkinter
 from PIL import ImageGrab
 
 
+class SelectorError(Exception):
+    pass
+
+
 class ScreenSelector(customtkinter.CTkToplevel):
     def __init__(self, parent, callback):
         super().__init__(parent)
@@ -49,8 +53,11 @@ class ScreenSelector(customtkinter.CTkToplevel):
         x2 = int(max(self.startX, endX))
         y2 = int(max(self.startY, endY))
 
+        self.destroy()
+
         screenshot = ImageGrab.grab(bbox=(x1, y1, x2, y2))
 
-        self.callback(screenshot)
+        if not screenshot:
+            raise SelectorError("Could not take a screenshot. Try again.")
 
-        self.destroy()
+        self.callback(screenshot)

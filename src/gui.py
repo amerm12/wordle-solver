@@ -3,7 +3,7 @@ from CTkToolTip import *
 from CTkMessagebox import CTkMessagebox
 from solver import WordleSolver, SolverError
 from analyzer import ImageAnalyzer, AnalyzerError
-from screenSelector import ScreenSelector
+from screenSelector import ScreenSelector, SelectorError
 import cv2
 import numpy as np
 
@@ -69,6 +69,7 @@ class SolverGui:
             y_offset=-25,
         )
 
+        # Load icon for screenshot button
         img = Image.open(
             "C:/Users/amera/OneDrive/Desktop/Skafiskafnjak/Amer/wordle-solver/assets/icons/screenshot.png"
         )
@@ -164,10 +165,13 @@ class SolverGui:
 
     # Press method when screenshot button is pressed
     def takeScreenshot(self):
-        # ToDo: Implement error handling in screen selector class
-        ScreenSelector(self.app, self.ssBack)
+        try:
+            ScreenSelector(self.app, self.processScreenshot)
+        except SelectorError as e:
+            self.showError(str(e))
+            return
 
-    def ssBack(self, screenshot):
+    def processScreenshot(self, screenshot):
         cvScreenshot = cv2.cvtColor(np.array(screenshot), cv2.COLOR_RGB2BGR)
 
         try:

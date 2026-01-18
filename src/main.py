@@ -8,6 +8,4 @@ def main():
 if __name__ == "__main__":
     main()
 
-# ToDo: Take screenshots of unlimited wordle game and store them to templateMap.
-# Use that for testing, if it can solve every game, no need to implement
-# 'average words left' stat.
+# ToDo: Does not work for light mode
