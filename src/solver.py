@@ -1,5 +1,6 @@
 import re
 import random
+from pathlib import Path
 
 
 class SolverError(Exception):
@@ -39,7 +40,7 @@ class WordleSolver:
                         self.misplacedLetters[index].append(letter.lower())
 
         with open(
-            "C:/Users/amera/OneDrive/Desktop/Skafiskafnjak/Amer/wordle-solver/solutions.txt"
+            Path(__file__).resolve().parent.parent / "solutions.txt"
         ) as f:
             fileWords = f.read().splitlines()
 
