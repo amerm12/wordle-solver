@@ -8,4 +8,4 @@ def main():
 if __name__ == "__main__":
     main()
 
-# ToDo: Does not work for light mode
+# ToDo: Test with double letters (doubleletter.png)

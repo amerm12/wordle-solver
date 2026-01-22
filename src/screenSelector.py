@@ -1,5 +1,7 @@
 import customtkinter
 from PIL import ImageGrab
+import cv2
+import numpy as np
 
 
 class SelectorError(Exception):
@@ -7,6 +9,7 @@ class SelectorError(Exception):
 
 
 class ScreenSelector(customtkinter.CTkToplevel):
+    # Define customtkinter window for overlay and bind press events
     def __init__(self, parent, callback):
         super().__init__(parent)
 
@@ -28,6 +31,7 @@ class ScreenSelector(customtkinter.CTkToplevel):
         self.canvas.bind("<B1-Motion>", self.onDrag)
         self.canvas.bind("<ButtonRelease-1>", self.onRelease)
 
+    # Press event attached on mouse click
     def onClick(self, event):
         self.startX = self.canvas.canvasx(event.x)
         self.startY = self.canvas.canvasy(event.y)
@@ -40,10 +44,12 @@ class ScreenSelector(customtkinter.CTkToplevel):
             width=3,
         )
 
+    # Press event attacked on mouse drag 
     def onDrag(self, event):
         curX, curY = (self.canvas.canvasx(event.x), self.canvas.canvasy(event.y))
         self.canvas.coords(self.rect, self.startX, self.startY, curX, curY)
 
+    # Press event attacked on releasing mouse click
     def onRelease(self, event):
         endX = self.canvas.canvasx(event.x)
         endY = self.canvas.canvasy(event.y)
@@ -59,5 +65,8 @@ class ScreenSelector(customtkinter.CTkToplevel):
 
         if not screenshot:
             raise SelectorError("Could not take a screenshot. Try again.")
+        
+        # Transform screenshot to cv2 format (array)
+        screenshot = cv2.cvtColor(np.array(screenshot), cv2.COLOR_RGB2BGR)
 
         self.callback(screenshot)

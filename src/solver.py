@@ -39,9 +39,7 @@ class WordleSolver:
                     if letter.lower() not in self.misplacedLetters[index]:
                         self.misplacedLetters[index].append(letter.lower())
 
-        with open(
-            Path(__file__).resolve().parent.parent / "solutions.txt"
-        ) as f:
+        with open(Path(__file__).resolve().parent.parent / "solutions.txt") as f:
             fileWords = f.read().splitlines()
 
         regex = self.constructRegex()
@@ -61,12 +59,11 @@ class WordleSolver:
             w for w in matches if all(c in w for c in misplacedLettersString)
         ]
 
-        # bestWords = self.getBestWords(filteredWords)
+        bestWords = self.getBestWords(filteredWords)
 
-        return filteredWords
+        return bestWords
 
     def constructRegex(self):
-
         wrongLettersString = "".join(self.wrongLetters)
 
         # Remove misplaced letters if they became correct during the game
@@ -107,62 +104,66 @@ class WordleSolver:
 
         return regex
 
-    # From all possible words gets best words
+    # ToDo: Recheck
     def getBestWords(self, filteredWords):
-        # Put all known letters (correct and misplaced) into one list
-        knownLetters = []
-        for correctLetter in self.correctLetters:
-            if correctLetter != ():
-                knownLetters.append(correctLetter)
-
-        for misplacedPosition in self.misplacedLetters:
-            if misplacedPosition != []:
-                for misplacedLetter in misplacedPosition:
-                    knownLetters.append(misplacedLetter)
-
+        # Loop through all words
         for i, word in enumerate(filteredWords):
-            # Remove all known letters from filtered word
-            for knownLetter in knownLetters:
-                if knownLetter in word:
-                    word = word.replace(knownLetter, "")
-
+            filteredWords[i] = {"word": word, "points": 0}
             # Check if word contains most common letters and add points
             if "s" in word:
-                filteredWords[i].append(+1)
+                filteredWords[i]["points"] += 45
             if "e" in word:
-                filteredWords[i].append(+1)
+                filteredWords[i]["points"] += 44
             if "a" in word:
-                filteredWords[i].append(+1)
+                filteredWords[i]["points"] += 41
             if "o" in word:
-                filteredWords[i].append(+1)
+                filteredWords[i]["points"] += 30
             if "r" in word:
-                filteredWords[i].append(+1)
+                filteredWords[i]["points"] += 30
             if "i" in word:
-                filteredWords[i].append(+1)
+                filteredWords[i]["points"] += 27
             if "l" in word:
-                filteredWords[i].append(+1)
+                filteredWords[i]["points"] += 24
             if "t" in word:
-                filteredWords[i].append(+1)
+                filteredWords[i]["points"] += 23
             if "n" in word:
-                filteredWords[i].append(+1)
+                filteredWords[i]["points"] += 21
             if "u" in word:
-                filteredWords[i].append(+1)
+                filteredWords[i]["points"] += 18
             if "d" in word:
-                filteredWords[i].append(+1)
+                filteredWords[i]["points"] += 17
             if "y" in word:
-                filteredWords[i].append(+1)
+                filteredWords[i]["points"] += 15
             if "c" in word:
-                filteredWords[i].append(+1)
+                filteredWords[i]["points"] += 14
             if "p" in word:
-                filteredWords[i].append(+1)
+                filteredWords[i]["points"] += 14
             if "m" in word:
-                filteredWords[i].append(+1)
+                filteredWords[i]["points"] += 13
             if "h" in word:
-                filteredWords[i].append(1)
+                filteredWords[i]["points"] += 11
             if "g" in word:
-                filteredWords[i].append(+1)
+                filteredWords[i]["points"] += 11
+            if "b" in word:
+                filteredWords[i]["points"] += 11
+            if "k" in word:
+                filteredWords[i]["points"] += 11
+            if "w" in word:
+                filteredWords[i]["points"] += 8
+            if "f" in word:
+                filteredWords[i]["points"] += 7
 
-        print(filteredWords)
+        filteredWords.sort(reverse=True, key=self.wordsSorter)
+
+        rankedWords = []
+
+        for word in filteredWords:
+            rankedWords.append(word["word"])
+
+        return rankedWords
+
+    def wordsSorter(self, e):
+        return e["points"]
 
     # Fetches 3 random words
     def fetchStartingWords(self):

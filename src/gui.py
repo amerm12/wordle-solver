@@ -6,8 +6,8 @@ from analyzer import ImageAnalyzer, AnalyzerError
 from screenSelector import ScreenSelector, SelectorError
 import cv2
 import numpy as np
-
-from PIL import Image, ImageOps
+from PIL import Image
+import os
 
 
 class SolverGui:
@@ -166,16 +166,25 @@ class SolverGui:
     # Press method when screenshot button is pressed
     def takeScreenshot(self):
         try:
-            ScreenSelector(self.app, self.processScreenshot)
+            ScreenSelector(self.app, self.processImage)
         except SelectorError as e:
             self.showError(str(e))
             return
 
-    def processScreenshot(self, screenshot):
-        cvScreenshot = cv2.cvtColor(np.array(screenshot), cv2.COLOR_RGB2BGR)
+    # Based on passed image or screenshot displays next best 3 words
+    def processImage(self, _image):
+        # If screenshot
+        if isinstance(_image, np.ndarray):
+            img = _image
+        # If uploaded image
+        else:
+            if not os.path.exists(_image):
+                raise AnalyzerError("File not found.")
+
+            img = cv2.imread(_image)
 
         try:
-            letters = self.analyzer.analyzeImage(cvScreenshot)
+            letters = self.analyzer.analyzeImage(img)
         except AnalyzerError as e:
             self.showError(str(e))
             return
@@ -203,19 +212,7 @@ class SolverGui:
         if not filepath:
             return
 
-        try:
-            letters = self.analyzer.analyzeImage(filepath)
-        except AnalyzerError as e:
-            self.showError(str(e))
-            return
-
-        try:
-            suggestedWords = self.solver.suggestWords(letters)
-        except SolverError as e:
-            self.showError(str(e))
-            return
-
-        self.displayWords(suggestedWords)
+        self.processImage(filepath)
 
     # Display suggested words in the labels
     def displayWords(self, words):

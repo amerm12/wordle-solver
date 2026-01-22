@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 from templateMap import TEMPLATES
-import os
+from PIL import Image
 
 
 class AnalyzerError(Exception):
@@ -10,15 +10,7 @@ class AnalyzerError(Exception):
 
 class ImageAnalyzer:
 
-    def analyzeImage(self, imagePath):
-        if isinstance(imagePath, np.ndarray):
-            img = imagePath
-        else:
-            if not os.path.exists(imagePath):
-                raise AnalyzerError("File not found.")
-
-            img = cv2.imread(imagePath)
-
+    def analyzeImage(self, img):
         squares = self.findSquares(img)
         if not squares:
             raise AnalyzerError("Error analying image. Try uploading different image.")
@@ -45,7 +37,12 @@ class ImageAnalyzer:
     def findSquares(self, _img):
         grayImage = cv2.cvtColor(_img, cv2.COLOR_BGR2GRAY)
 
-        thresh = cv2.threshold(grayImage, 25, 255, cv2.THRESH_BINARY)[1]
+        mode = self.getMode(_img)
+
+        if self.getMode(_img) == "dark":
+            thresh = cv2.threshold(grayImage, 25, 255, cv2.THRESH_BINARY)[1]
+        elif self.getMode(_img) == "light":
+            thresh = cv2.threshold(grayImage, 230, 255, cv2.THRESH_BINARY)[1]
 
         contours, h = cv2.findContours(thresh, cv2.RETR_EXTERNAL, 2)
 
@@ -70,7 +67,6 @@ class ImageAnalyzer:
 
         croppedImg = _img[y : y + h, x : x + w]
         grayImg = cv2.cvtColor(croppedImg, cv2.COLOR_BGR2GRAY)
-        # threshImg = cv2.threshold(grayImg, 200, 255, cv2.THRESH_BINARY_INV)[1]
 
         bestValue = None
         bestLetter = None
@@ -78,7 +74,6 @@ class ImageAnalyzer:
         for letter, tmplPath in TEMPLATES.items():
 
             grayTmpl = cv2.imread(tmplPath, cv2.IMREAD_GRAYSCALE)
-            # threshTmpl = cv2.threshold(grayTmpl, 150, 255, cv2.THRESH_BINARY_INV)[1]
 
             result = cv2.matchTemplate(grayImg, grayTmpl, cv2.TM_CCOEFF_NORMED)
             maxVal = cv2.minMaxLoc(result)[1]
@@ -118,3 +113,23 @@ class ImageAnalyzer:
             return "C"
         else:
             pass
+
+    # ToDo: Exception Handling
+    # ToDo: It's not gonna work because screenshot does not have to be all squares,
+    # could be just few rows.
+    def getMode(self, PILimg):
+        img = Image.fromarray(PILimg)
+        colors = img.getcolors(maxcolors=1024)
+        maxOccurence, mostPresent = 0, 0
+        try:
+            for c in colors:
+                if c[0] > maxOccurence:
+                    (maxOccurence, mostPresent) = c
+
+            print(mostPresent)
+            if mostPresent == (255, 255, 255):
+                return "light"
+            elif mostPresent == (19, 18, 18):
+                return "dark"
+        except TypeError:
+            raise Exception("Too many colors in the image")
