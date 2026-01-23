@@ -26,15 +26,17 @@ class ImageAnalyzer:
         letters = []
 
         for square in squares:
-            if mode == "light":
-                letter = self.lightAnalyzer.extractLetter(square, img)
-            elif mode == "dark":
-                letter = self.darkAnalyzer.extractLetter(square, img)
+
+            letter = self.extractLetter(square, img)
 
             if letter == None:
                 break
 
-            correctness = self.getColor(square, img)
+            if mode == "dark":
+                correctness = self.darkAnalyzer.getColor(square, img)
+            elif mode == "light":
+                correctness = self.lightAnalyzer.getColor(square, img)
+
             if letter and correctness:
                 letters.append((letter, correctness))
 
@@ -45,7 +47,60 @@ class ImageAnalyzer:
 
         return letters
 
-    # Detects color in the square
+    # Detects letter in the square
+    def extractLetter(self, _square, _img):
+        (x, y, w, h) = _square
+
+        croppedImg = _img[y : y + h, x : x + w]
+        grayImg = cv2.cvtColor(croppedImg, cv2.COLOR_BGR2GRAY)
+
+        bestValue = None
+        bestLetter = None
+
+        for letter, tmplPath in TEMPLATES.items():
+
+            grayTmpl = cv2.imread(tmplPath, cv2.IMREAD_GRAYSCALE)
+
+            result = cv2.matchTemplate(grayImg, grayTmpl, cv2.TM_CCOEFF_NORMED)
+            maxVal = cv2.minMaxLoc(result)[1]
+
+            if bestValue == None or maxVal > bestValue:
+                bestValue = maxVal
+                bestLetter = letter
+
+        if bestValue >= 0.7:
+            return bestLetter
+        else:
+            return None
+
+
+# Inherized Image Analyzer class for Dark mode
+class DarkImageAnalyzer(ImageAnalyzer):
+
+    # Find all squares in the image for dark mode
+    def findSquares(self, _img):
+        grayImage = cv2.cvtColor(_img, cv2.COLOR_BGR2GRAY)
+
+        thresh = cv2.threshold(grayImage, 25, 255, cv2.THRESH_BINARY)[1]
+
+        contours, h = cv2.findContours(thresh, cv2.RETR_EXTERNAL, 2)
+
+        squares = []
+        for cnt in contours:
+
+            approx = cv2.approxPolyDP(cnt, 0.01 * cv2.arcLength(cnt, True), True)
+            if len(approx) == 4:
+                x, y, w, h = cv2.boundingRect(cnt)
+                aspectRatio = w / h
+
+                if 0.7 <= aspectRatio <= 1.3 and cv2.contourArea(cnt) > 100:
+                    squares.append((x, y, w, h))
+
+        squares.sort(key=lambda rect: (rect[1], rect[0]))
+
+        return squares
+
+    # Detects color in the square for dark mode
     def getColor(self, _square, _img):
         (x, y, w, h) = _square
 
@@ -73,72 +128,15 @@ class ImageAnalyzer:
             pass
 
 
-# Inherized Image Analyzer class for Dark mode
-class DarkImageAnalyzer(ImageAnalyzer):
-
-    # Find all squares in the image
-    def findSquares(self, _img):
-        grayImage = cv2.cvtColor(_img, cv2.COLOR_BGR2GRAY)
-
-        thresh = cv2.threshold(grayImage, 25, 255, cv2.THRESH_BINARY)[1]
-
-        contours, h = cv2.findContours(thresh, cv2.RETR_EXTERNAL, 2)
-
-        squares = []
-        for cnt in contours:
-
-            approx = cv2.approxPolyDP(cnt, 0.01 * cv2.arcLength(cnt, True), True)
-            if len(approx) == 4:
-                x, y, w, h = cv2.boundingRect(cnt)
-                aspectRatio = w / h
-
-                if 0.7 <= aspectRatio <= 1.3 and cv2.contourArea(cnt) > 100:
-                    squares.append((x, y, w, h))
-
-        squares.sort(key=lambda rect: (rect[1], rect[0]))
-
-        return squares
-
-    # Detects letter in the square
-    def extractLetter(self, _square, _img):
-        (x, y, w, h) = _square
-
-        croppedImg = _img[y : y + h, x : x + w]
-        grayImg = cv2.cvtColor(croppedImg, cv2.COLOR_BGR2GRAY)
-
-        bestValue = None
-        bestLetter = None
-
-        for letter, tmplPath in TEMPLATES.items():
-
-            grayTmpl = cv2.imread(tmplPath, cv2.IMREAD_GRAYSCALE)
-
-            result = cv2.matchTemplate(grayImg, grayTmpl, cv2.TM_CCOEFF_NORMED)
-            maxVal = cv2.minMaxLoc(result)[1]
-
-            if bestValue == None or maxVal > bestValue:
-                bestValue = maxVal
-                bestLetter = letter
-
-        if bestValue >= 0.7:
-            return bestLetter
-        else:
-            return None
-
-
 # Inherized Image Analyzer class for Light mode
 class LightImageAnalyzer(ImageAnalyzer):
 
-    # Find all squares in the image
+    # Find all squares in the image for light mode
     def findSquares(self, _img):
         grayImage = cv2.cvtColor(_img, cv2.COLOR_BGR2GRAY)
 
         thresh = cv2.threshold(grayImage, 250, 255, cv2.THRESH_BINARY_INV)[1]
 
-        """ cv2.imshow("img", thresh)
-        cv2.waitKey(0)
-        exit() """
-
         contours, h = cv2.findContours(thresh, cv2.RETR_EXTERNAL, 2)
 
         squares = []
@@ -156,29 +154,29 @@ class LightImageAnalyzer(ImageAnalyzer):
 
         return squares
 
-    # ToDo: Add letter screenshots on light mode
-    # Detects letter in the square
-    def extractLetter(self, _square, _img):
+    # Detects color in the square for light mode
+    def getColor(self, _square, _img):
         (x, y, w, h) = _square
 
-        croppedImg = _img[y : y + h, x : x + w]
-        grayImg = cv2.cvtColor(croppedImg, cv2.COLOR_BGR2GRAY)
+        croppedImage = _img[y : y + h, x : x + w]
 
-        bestValue = None
-        bestLetter = None
+        corners = [
+            croppedImage[0:5, 0:5],
+            croppedImage[0:5, -5:],
+            croppedImage[-5:, 0:5],
+            croppedImage[-5:, -5:],
+        ]
 
-        for letter, tmplPath in TEMPLATES.items():
+        background_samples = np.vstack([corner.reshape(-1, 3) for corner in corners])
+        avg_background_color = np.mean(background_samples, axis=0)
 
-            grayTmpl = cv2.imread(tmplPath, cv2.IMREAD_GRAYSCALE)
+        b, g, r = avg_background_color
 
-            result = cv2.matchTemplate(grayImg, grayTmpl, cv2.TM_CCOEFF_NORMED)
-            maxVal = cv2.minMaxLoc(result)[1]
-
-            if bestValue == None or maxVal > bestValue:
-                bestValue = maxVal
-                bestLetter = letter
-
-        if bestValue >= 0.7:
-            return bestLetter
+        if 110 < r < 130 and 114 < b < 134 and 116 < g < 136:
+            return "I"
+        elif 191 < r < 211 and 170 < g < 190 and 78 < b < 98:
+            return "M"
+        elif 96 < r < 116 and 160 < g < 180 and 90 < b < 110:
+            return "C"
         else:
-            return None
+            pass
