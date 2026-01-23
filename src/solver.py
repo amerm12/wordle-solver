@@ -104,7 +104,7 @@ class WordleSolver:
 
         return regex
 
-    # ToDo: Recheck
+    # Orders words from best to worst based on letter frequency in English language
     def getBestWords(self, filteredWords):
         # Loop through all words
         for i, word in enumerate(filteredWords):

@@ -11,6 +11,40 @@ class AnalyzerError(Exception):
 # Parent Image Analyzer Class
 class ImageAnalyzer:
 
+    def analyzeImage(self, img, mode):
+        self.lightAnalyzer = LightImageAnalyzer()
+        self.darkAnalyzer = DarkImageAnalyzer()
+
+        if mode == "light":
+            squares = self.lightAnalyzer.findSquares(img)
+        elif mode == "dark":
+            squares = self.darkAnalyzer.findSquares(img)
+
+        if not squares:
+            raise AnalyzerError("Error analying image. Try uploading different image.")
+
+        letters = []
+
+        for square in squares:
+            if mode == "light":
+                letter = self.lightAnalyzer.extractLetter(square, img)
+            elif mode == "dark":
+                letter = self.darkAnalyzer.extractLetter(square, img)
+
+            if letter == None:
+                break
+
+            correctness = self.getColor(square, img)
+            if letter and correctness:
+                letters.append((letter, correctness))
+
+        if letters == []:
+            raise AnalyzerError(
+                "Error reading the letters from the images. Try uploading different image."
+            )
+
+        return letters
+
     # Detects color in the square
     def getColor(self, _square, _img):
         (x, y, w, h) = _square
@@ -41,28 +75,6 @@ class ImageAnalyzer:
 
 # Inherized Image Analyzer class for Dark mode
 class DarkImageAnalyzer(ImageAnalyzer):
-    def analyzeImage(self, img):
-        squares = self.findSquares(img)
-        if not squares:
-            raise AnalyzerError("Error analying image. Try uploading different image.")
-
-        letters = []
-
-        for square in squares:
-            letter = self.extractLetter(square, img)
-            if letter == None:
-                break
-
-            correctness = super().getColor(square, img)
-            if letter and correctness:
-                letters.append((letter, correctness))
-
-        if letters == []:
-            raise AnalyzerError(
-                "Error reading the letters from the images. Try uploading different image."
-            )
-
-        return letters
 
     # Find all squares in the image
     def findSquares(self, _img):
@@ -116,31 +128,6 @@ class DarkImageAnalyzer(ImageAnalyzer):
 
 # Inherized Image Analyzer class for Light mode
 class LightImageAnalyzer(ImageAnalyzer):
-
-    def analyzeImage(self, img):
-        squares = self.findSquares(img)
-        if not squares:
-            raise AnalyzerError(
-                "Error analying image. Try uploading different image or switching to different mode."
-            )
-
-        letters = []
-
-        for square in squares:
-            letter = self.extractLetter(square, img)
-            if letter == None:
-                break
-
-            correctness = super().getColor(square, img)
-            if letter and correctness:
-                letters.append((letter, correctness))
-
-        if letters == []:
-            raise AnalyzerError(
-                "Error reading the letters from the images. Try uploading different image or switching to different mode."
-            )
-
-        return letters
 
     # Find all squares in the image
     def findSquares(self, _img):

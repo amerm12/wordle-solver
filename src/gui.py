@@ -15,10 +15,10 @@ class SolverGui:
     # Initializes gui, sets default settings
     def __init__(self):
         self.solver = WordleSolver()
-        # self.analyzer = ImageAnalyzer()
-        self.mode = "light"
-        self.darkAnalyzer = DarkImageAnalyzer()
-        self.lightAnalyzer = LightImageAnalyzer()
+        self.mode = "dark"
+        """ self.darkAnalyzer = DarkImageAnalyzer()
+        self.lightAnalyzer = LightImageAnalyzer() """
+        self.analyzer = ImageAnalyzer()
         self.createApp()
         self.createWidgets()
         self.app.mainloop()
@@ -156,12 +156,12 @@ class SolverGui:
             self.wordFrames.append(wordFrame)
             self.wordLabels.append(wordLabel)
 
-        # Al ---
-        self.modeSwitch = customtkinter.CTkSwitch(
+        # Define switch for changing themes
+        self.switchTheme = customtkinter.CTkSwitch(
             self.app, text="Dark", command=self.toggleMode
         )
-        self.modeSwitch.place(relx=0.98, rely=0.98, anchor="se")
-        self.modeSwitch.deselect()  # off in dark mode
+        self.switchTheme.place(relx=0.98, rely=0.98, anchor="se")
+        self.switchTheme.deselect()
         self.applyTheme()
 
     # Display starting words in the empty label
@@ -195,10 +195,11 @@ class SolverGui:
             img = cv2.imread(_image)
 
         try:
-            if self.mode == "dark":
+            letters = self.analyzer.analyzeImage(img, self.mode)
+            """ if self.mode == "dark":
                 letters = self.darkAnalyzer.analyzeImage(img)
             elif self.mode == "light":
-                letters = self.lightAnalyzer.analyzeImage(img)
+                letters = self.lightAnalyzer.analyzeImage(img) """
         except AnalyzerError as e:
             self.showError(str(e))
             return
@@ -257,37 +258,82 @@ class SolverGui:
         y = int(((screenHeight / 2) - (height / 1.5)) * scale_factor)
         return f"{width}x{height}+{x}+{y}"
 
-    # Al ---
+    # Change to appropriate colors based on the mode
+    # Completely written by Al because I was lazy to make designs at 2am
     def applyTheme(self):
         if self.mode == "dark":
             customtkinter.set_appearance_mode("dark")
             self.app.configure(fg_color="#121213")
+
             logo_color = "#538d4e"
             frame_color = "#242526"
             btn_color = "#74a67a"
             btn_hover = "#5f8c5c"
+            btn_text = "#ffffff"
+
         else:
             customtkinter.set_appearance_mode("light")
-            self.app.configure(fg_color="#f2f2f2")
-            logo_color = "#2f7d32"
+
+            self.app.configure(fg_color="#FAFAFA")
+
+            logo_color = "#538d4e"
+
             frame_color = "#ffffff"
-            btn_color = "#2f7d32"
-            btn_hover = "#256428"
+            frame_border_color = "#D3D6DA"
+
+            btn_color = "#538d4e"
+            btn_hover = "#467a42"
+            btn_text = "#ffffff"
 
         if hasattr(self, "logoLabel"):
             self.logoLabel.configure(text_color=logo_color)
 
-        # buttons
         for name in ("startButton", "screenshotButton", "uploadButton"):
             if hasattr(self, name):
-                getattr(self, name).configure(fg_color=btn_color, hover_color=btn_hover)
+                btn = getattr(self, name)
+                btn.configure(
+                    fg_color=btn_color,
+                    hover_color=btn_hover,
+                    text_color=btn_text,
+                )
 
-        # word frames
         if hasattr(self, "wordFrames"):
             for fr in self.wordFrames:
                 fr.configure(fg_color=frame_color)
 
+                if self.mode == "light":
+                    fr.configure(border_color=frame_border_color, border_width=1)
+                else:
+                    fr.configure(border_width=0)
+
+            # buttons
+            for name in ("startButton", "screenshotButton", "uploadButton"):
+                if hasattr(self, name):
+                    btn = getattr(self, name)
+                    btn.configure(
+                        fg_color=btn_color,
+                        hover_color=btn_hover,
+                        text_color=btn_text,
+                    )
+
+                    if self.mode == "light":
+                        btn.configure(border_color=frame_border_color, border_width=1)
+
+            if hasattr(self, "wordFrames"):
+                for fr in self.wordFrames:
+                    fr.configure(fg_color=frame_color)
+
+                    if self.mode == "light":
+                        fr.configure(border_color=frame_border_color, border_width=1)
+
     def toggleMode(self):
-        self.mode = "light" if self.mode == "dark" else "dark"
-        self.modeSwitch.configure(text="Dark" if self.mode == "dark" else "Light")
+        if self.mode == "dark":
+            self.mode = "light"
+        else:
+            self.mode = "dark"
+
+        self.switchTheme.configure(text="Dark" if self.mode == "dark" else "Light")
         self.applyTheme()
+
+        messageText = "Switching mode will influence how image is processes. Make sure you're using same mode as the game is in screenshots. "
+        CTkMessagebox(title="Note", message=messageText, icon="info")
