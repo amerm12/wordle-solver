@@ -16,8 +16,6 @@ class SolverGui:
     def __init__(self):
         self.solver = WordleSolver()
         self.mode = "dark"
-        """ self.darkAnalyzer = DarkImageAnalyzer()
-        self.lightAnalyzer = LightImageAnalyzer() """
         self.analyzer = ImageAnalyzer()
         self.createApp()
         self.createWidgets()
@@ -63,15 +61,6 @@ class SolverGui:
             sticky="w",
         )
 
-        # Define tooltip for start new game button using CTkToolTip library
-        CTkToolTip(
-            self.startButton,
-            delay=0.2,
-            message="Get 3 best words to start with",
-            x_offset=15,
-            y_offset=-25,
-        )
-
         # Load icon for screenshot button
         img = Image.open(
             "C:/Users/amera/OneDrive/Desktop/Skafiskafnjak/Amer/wordle-solver/assets/icons/screenshot.png"
@@ -100,15 +89,6 @@ class SolverGui:
             pady=10,
         )
 
-        # Define tooltip for screenshot button using CTkToolTip library
-        CTkToolTip(
-            self.screenshotButton,
-            delay=0.2,
-            message="Take a screenshot",
-            x_offset=15,
-            y_offset=-25,
-        )
-
         # Define upload button
         self.uploadButton = customtkinter.CTkButton(
             self.app,
@@ -128,15 +108,6 @@ class SolverGui:
             pady=10,
             columnspan=1,
             sticky="w",
-        )
-
-        # Define tooltip for upload button using CTkToolTip library
-        CTkToolTip(
-            self.uploadButton,
-            delay=0.2,
-            message="Get best words for uploaded image",
-            x_offset=15,
-            y_offset=-25,
         )
 
         # Crates 3 same frames and labels for displaying recommended words
@@ -163,6 +134,43 @@ class SolverGui:
         self.switchTheme.place(relx=0.98, rely=0.98, anchor="se")
         self.switchTheme.deselect()
         self.applyTheme()
+
+    def createTooltips(self):
+        # Define tooltip for start new game button using CTkToolTip library
+        CTkToolTip(
+            self.startButton,
+            delay=0.2,
+            message="Get 3 best words to start with",
+            x_offset=15,
+            y_offset=-25,
+        )
+
+        # Define tooltip for screenshot button using CTkToolTip library
+        CTkToolTip(
+            self.screenshotButton,
+            delay=0.2,
+            message="Take a screenshot",
+            x_offset=15,
+            y_offset=-25,
+        )
+
+        # Define tooltip for upload button using CTkToolTip library
+        CTkToolTip(
+            self.uploadButton,
+            delay=0.2,
+            message="Get best words for uploaded image",
+            x_offset=15,
+            y_offset=-25,
+        )
+
+        # Define tooltip for theme switch using CTkToolTip library
+        CTkToolTip(
+            self.switchTheme,
+            delay=0.2,
+            message="Switch theme to Light/Dark",
+            x_offset=15,
+            y_offset=-25,
+        )
 
     # Display starting words in the empty label
     def startGame(self):
@@ -196,10 +204,6 @@ class SolverGui:
 
         try:
             letters = self.analyzer.analyzeImage(img, self.mode)
-            """ if self.mode == "dark":
-                letters = self.darkAnalyzer.analyzeImage(img)
-            elif self.mode == "light":
-                letters = self.lightAnalyzer.analyzeImage(img) """
         except AnalyzerError as e:
             self.showError(str(e))
             return
@@ -234,7 +238,8 @@ class SolverGui:
         for i, frame in enumerate(self.wordFrames):
             label = self.wordLabels[i]
             if i < len(words):
-                label.configure(text=words[i].upper())
+                # label.configure(text=words[i].upper())
+                label.configure(text=f"{i + 1}. {words[i].upper()}")
                 frame.grid(
                     row=3 + i, column=0, pady=(30 if i == 0 else 10, 0), columnspan=3
                 )
@@ -325,6 +330,8 @@ class SolverGui:
 
                     if self.mode == "light":
                         fr.configure(border_color=frame_border_color, border_width=1)
+
+        self.createTooltips()
 
     def toggleMode(self):
         if self.mode == "dark":
