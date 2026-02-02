@@ -1,17 +1,19 @@
+import os
+from pathlib import Path
+
 import customtkinter
-from CTkToolTip import *
-from CTkMessagebox import CTkMessagebox
-from solver import WordleSolver, SolverError
-from analyzer import ImageAnalyzer, AnalyzerError, DarkImageAnalyzer, LightImageAnalyzer
-from screenSelector import ScreenSelector, SelectorError
 import cv2
 import numpy as np
+from CTkMessagebox import CTkMessagebox
+from CTkToolTip import *
 from PIL import Image
-import os
+
+from analyzer import AnalyzerError, DarkImageAnalyzer, ImageAnalyzer, LightImageAnalyzer
+from screenSelector import ScreenSelector, SelectorError
+from solver import SolverError, WordleSolver
 
 
 class SolverGui:
-
     # Initializes gui, sets default settings
     def __init__(self):
         self.solver = WordleSolver()
@@ -62,7 +64,10 @@ class SolverGui:
         )
 
         # Load icon for screenshot button
-        img = Image.open("../assets/icons/screenshot.png")
+        iconPath = (
+            Path(__file__).resolve().parent.parent / "assets/icons/screenshot.png"
+        )
+        img = Image.open(iconPath)
         icon = customtkinter.CTkImage(
             light_image=img,
             size=(50, 50),
