@@ -62,9 +62,7 @@ class SolverGui:
         )
 
         # Load icon for screenshot button
-        img = Image.open(
-            "C:/Users/amera/OneDrive/Desktop/Skafiskafnjak/Amer/wordle-solver/assets/icons/screenshot.png"
-        )
+        img = Image.open("../assets/icons/screenshot.png")
         icon = customtkinter.CTkImage(
             light_image=img,
             size=(50, 50),
